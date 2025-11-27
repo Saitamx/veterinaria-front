@@ -1,4 +1,4 @@
-import dayjs from 'dayjs'
+import dayjs from '../../lib/dayjs'
 import { useEffect, useMemo, useState } from 'react'
 import { useAppointments } from '../../contexts/AppointmentsContext'
 import { useAuth } from '../../contexts/AuthContext'

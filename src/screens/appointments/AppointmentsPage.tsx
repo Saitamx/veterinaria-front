@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import dayjs from 'dayjs'
+import dayjs from '../../lib/dayjs'
 import { useAppointments } from '../../contexts/AppointmentsContext'
 import { api } from '../../services/backendApi'
 import { Button } from '../../components/ui/Button'

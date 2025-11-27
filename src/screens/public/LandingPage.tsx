@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import dayjs from 'dayjs'
+import dayjs from '../../lib/dayjs'
 import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
 import { Button } from '../../components/ui/Button'
