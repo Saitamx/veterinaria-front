@@ -9,10 +9,12 @@ import { Modal } from '../../components/ui/Modal'
 import type { Appointment } from '../../types'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 
 export function AppointmentsPage() {
 	const { appointments, vets, cancel, reschedule } = useAppointments()
 	const { user } = useAuth()
+	const { show } = useToast()
 	const [open, setOpen] = useState(false)
 	const [editing, setEditing] = useState<Appointment | null>(null)
 	const [form, setForm] = useState({
@@ -72,6 +74,10 @@ export function AppointmentsPage() {
 
 	async function submit() {
 		if (!form.vetId || !form.slot || !editing) return
+		if (dayjs(form.slot).isBefore(dayjs())) {
+			alert('No puedes reprogramar a una fecha pasada')
+			return
+		}
 		if (!confirm('¿Confirmas reprogramar esta cita?')) return
 		await reschedule(editing.id as any, form.slot, form.vetId)
 		setOpen(false)
@@ -88,14 +94,18 @@ export function AppointmentsPage() {
 		if (!cform.vetId) e.vetId = 'Selecciona veterinario'
 		if (!cform.date) e.date = 'Selecciona fecha'
 		if (!cform.slot) e.slot = 'Selecciona horario'
+		if (cform.slot && dayjs(cform.slot).isBefore(dayjs())) e.slot = 'No puedes agendar en el pasado'
 		if (!cform.reason || cform.reason.trim().length < 3) e.reason = 'Motivo mínimo 3 caracteres'
 		setCErrors(e)
 		if (Object.keys(e).length > 0) return
 		if (!confirm('¿Crear nueva cita para este cliente?')) return
-		await api.manageCreateAppointment({ ...cform })
-		setCreateOpen(false)
-		// refresco simple recargando página actual de citas al cerrar modal
-		location.reload()
+		try {
+			await api.manageCreateAppointment({ ...cform })
+			setCreateOpen(false)
+			show({ title: 'Cita creada', variant: 'success' })
+		} catch (err: any) {
+			show({ title: 'Error al crear cita', description: err?.message || 'Intenta nuevamente', variant: 'error' })
+		}
 	}
 
 	return (
@@ -170,6 +180,7 @@ export function AppointmentsPage() {
 					<Input
 						label="Fecha"
 						type="date"
+						min={dayjs().format('YYYY-MM-DD')}
 						value={form.date}
 						onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
 					/>
@@ -207,7 +218,7 @@ export function AppointmentsPage() {
 						<option value="" disabled>Selecciona...</option>
 						{vets.map((v) => (<option key={v.id} value={v.id}>{v.name}</option>))}
 					</Select>
-					<Input label="Fecha" type="date" value={cform.date} onChange={(e) => setCform((f) => ({ ...f, date: e.target.value }))} error={cerrors.date} />
+					<Input label="Fecha" type="date" min={dayjs().format('YYYY-MM-DD')} value={cform.date} onChange={(e) => setCform((f) => ({ ...f, date: e.target.value }))} error={cerrors.date} />
 					<Select label="Horario" value={cform.slot} onChange={(e) => setCform((f) => ({ ...f, slot: e.target.value }))} error={cerrors.slot}>
 						<option value="">Selecciona horario</option>
 						{cslots.map((s) => (<option key={s} value={s}>{dayjs(s).format('HH:mm')}</option>))}

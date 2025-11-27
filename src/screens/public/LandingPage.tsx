@@ -51,6 +51,7 @@ export function LandingPage() {
 			if (!form.vetId) e.vetId = 'Selecciona un veterinario'
 			if (!form.date) e.date = 'Selecciona una fecha'
 			if (!form.slot) e.slot = 'Selecciona un horario disponible'
+			if (form.slot && dayjs(form.slot).isBefore(dayjs())) e.slot = 'No puedes agendar en el pasado'
 			if (!form.reason || form.reason.trim().length < 3) e.reason = 'Indica el motivo (mínimo 3 caracteres)'
 			setErrors(e)
 			if (Object.keys(e).length > 0) return
@@ -184,7 +185,7 @@ export function LandingPage() {
 										<option key={v.id} value={v.id}>{v.name}</option>
 									))}
 								</Select>
-								<Input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} label="Fecha" error={errors.date} />
+								<Input type="date" min={dayjs().format('YYYY-MM-DD')} value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} label="Fecha" error={errors.date} />
 								<Select value={form.slot} onChange={(e) => setForm((f) => ({ ...f, slot: e.target.value }))} label="Horario" error={errors.slot}>
 									<option value="">Horario</option>
 									{slots.map((s) => (
