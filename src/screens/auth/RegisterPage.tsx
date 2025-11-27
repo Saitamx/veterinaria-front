@@ -1,0 +1,62 @@
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
+import { Input } from '../../components/ui/Input'
+import { Button } from '../../components/ui/Button'
+import { useToast } from '../../contexts/ToastContext'
+
+export function RegisterPage() {
+	const { registerClient } = useAuth()
+	const { show } = useToast()
+	const navigate = useNavigate()
+	const [name, setName] = useState('')
+	const [phone, setPhone] = useState('')
+	const [email, setEmail] = useState('')
+	const [password, setPassword] = useState('')
+	const [loading, setLoading] = useState(false)
+
+	async function submit(e: React.FormEvent) {
+		e.preventDefault()
+		setLoading(true)
+		const ok = await registerClient({ name, email, password, phone })
+		setLoading(false)
+		if (!ok) {
+			show({ title: 'No se pudo registrar (correo en uso)', variant: 'error' })
+			return
+		}
+		show({ title: 'Registro exitoso', variant: 'success' })
+		navigate('/cliente', { replace: true })
+	}
+
+	return (
+		<div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+			<div className="relative mx-auto grid min-h-[calc(100dvh-64px)] max-w-6xl place-items-center px-4">
+				<div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white shadow-soft">
+					<div className="rounded-t-2xl bg-gradient-to-r from-primary-600 to-primary-500 px-6 py-5 text-white">
+						<div className="text-sm opacity-90">Únete a Pochita</div>
+						<h1 className="text-xl font-semibold">Crear cuenta</h1>
+					</div>
+					<div className="px-6 py-6">
+						<form className="space-y-4" onSubmit={submit}>
+							<Input label="Nombre completo" placeholder="Ej. Juan Pérez" value={name} onChange={(e) => setName(e.target.value)} />
+							<Input label="Teléfono" placeholder="Ej. 999-111-222" value={phone} onChange={(e) => setPhone(e.target.value)} />
+							<Input type="email" label="Correo" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+							<Button type="submit" isLoading={loading} className="w-full">
+								Registrarme
+							</Button>
+						</form>
+						<p className="mt-4 text-center text-sm text-gray-600">
+							¿Ya tienes cuenta?{' '}
+							<Link to="/login" className="text-primary-600 hover:underline">
+								Ingresa
+							</Link>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+
