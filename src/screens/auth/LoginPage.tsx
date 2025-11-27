@@ -13,6 +13,7 @@ export function LoginPage() {
 	const [password, setPassword] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+	const [generalError, setGeneralError] = useState<string | null>(null)
 
 	function validate(): boolean {
 		const e: typeof errors = {}
@@ -27,11 +28,21 @@ export function LoginPage() {
 		if (!validate()) return
 		try {
 			setLoading(true)
+			setGeneralError(null)
 			await login(email, password)
 			show({ title: 'Bienvenido', variant: 'success' })
 			navigate('/', { replace: true })
 		} catch (err: any) {
-			const msg = typeof err?.message === 'string' ? err.message : 'Credenciales inválidas'
+			let msg = 'Credenciales inválidas'
+			if (typeof err?.message === 'string') {
+				try {
+					const parsed = JSON.parse(err.message)
+					msg = parsed?.error ?? msg
+				} catch {
+					msg = err.message || msg
+				}
+			}
+			setGeneralError(msg)
 			show({ title: 'No se pudo iniciar sesión', description: msg, variant: 'error' })
 		} finally {
 			setLoading(false)
@@ -48,6 +59,11 @@ export function LoginPage() {
 					</div>
 					<div className="px-6 py-6">
 						<form className="space-y-4" onSubmit={submit}>
+							{generalError ? (
+								<div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+									{generalError}
+								</div>
+							) : null}
 							<Input type="email" label="Correo electrónico" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
 							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} />
 							<Button type="submit" isLoading={loading} className="w-full">

@@ -16,6 +16,7 @@ export function RegisterPage() {
 	const [confirmPassword, setConfirmPassword] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [errors, setErrors] = useState<{ name?: string; phone?: string; email?: string; password?: string; confirmPassword?: string }>({})
+	const [generalError, setGeneralError] = useState<string | null>(null)
 
 	function validate(): boolean {
 		const e: typeof errors = {}
@@ -33,6 +34,7 @@ export function RegisterPage() {
 		if (!validate()) return
 		try {
 			setLoading(true)
+			setGeneralError(null)
 			await registerClient({ name, email, password, phone })
 			show({ title: 'Registro exitoso', variant: 'success' })
 			navigate('/cliente', { replace: true })
@@ -46,6 +48,7 @@ export function RegisterPage() {
 					msg = err.message
 				}
 			}
+			setGeneralError(msg)
 			show({ title: 'Error en registro', description: msg, variant: 'error' })
 		} finally {
 			setLoading(false)
@@ -62,6 +65,11 @@ export function RegisterPage() {
 					</div>
 					<div className="px-6 py-6">
 						<form className="space-y-4" onSubmit={submit} autoComplete="off">
+							{generalError ? (
+								<div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+									{generalError}
+								</div>
+							) : null}
 							<Input label="Nombre completo" placeholder="Ej. Juan Pérez" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} autoComplete="off" />
 							<Input label="Teléfono" placeholder="Ej. 999-111-222" value={phone} onChange={(e) => setPhone(e.target.value)} error={errors.phone} autoComplete="off" />
 							<Input type="email" label="Correo" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} autoComplete="off" />

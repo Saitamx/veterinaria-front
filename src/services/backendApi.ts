@@ -57,6 +57,15 @@ export const api = {
 	async cancelAppointment(id: string, canceledBy: 'vet' | 'client') {
 		return http<Appointment>(`/appointments/${id}?canceledBy=${canceledBy}`, { method: 'DELETE' })
 	},
+	async adminListUsers() {
+		return http<Array<{ id: string; name: string; email: string; role: 'CLIENTE' | 'RECEPCIONISTA' | 'VETERINARIO' | 'ADMIN'; phone?: string }>>('/admin/users')
+	},
+	async adminCreateUser(input: { name: string; email: string; password: string; role: 'CLIENTE' | 'RECEPCIONISTA' | 'VETERINARIO' | 'ADMIN'; phone?: string }) {
+		return http(`/admin/users`, { method: 'POST', body: JSON.stringify(input) })
+	},
+	async manageCreateAppointment(input: { userEmail: string; vetId: string; dateISO: string; reason: string }) {
+		return http('/manage/appointments', { method: 'POST', body: JSON.stringify(input) })
+	},
 	events(onEvent: (e: MessageEvent) => void) {
 		const es = new EventSource(`${BASE_URL}/events`)
 		es.addEventListener('vet-cancel', onEvent as any)

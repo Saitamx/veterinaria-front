@@ -6,6 +6,7 @@ import { LandingPage } from './screens/public/LandingPage'
 import { ClientDashboard } from './screens/client/ClientDashboard'
 import { VetDashboard } from './screens/vet/VetDashboard'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { UsersPage } from './screens/admin/UsersPage'
 
 export function AppRouter() {
 	return (
@@ -35,6 +36,14 @@ export function AppRouter() {
 				element={
 					<ProtectedRoute roles={['veterinario', 'admin']}>
 						<VetDashboard />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path="/admin"
+				element={
+					<ProtectedRoute roles={['admin']}>
+						<UsersPage />
 					</ProtectedRoute>
 				}
 			/>

@@ -34,8 +34,13 @@ function Links() {
 			</>
 		)
 	}
-	// admin ve solo Agenda (acotado)
-	return <NavLink to="/recepcion" className={({ isActive }) => navCls(isActive)}>Agenda</NavLink>
+	// admin: Agenda y Usuarios
+	return (
+		<>
+			<NavLink to="/recepcion" className={({ isActive }) => navCls(isActive)}>Agenda</NavLink>
+			<NavLink to="/admin" className={({ isActive }) => navCls(isActive)}>Usuarios</NavLink>
+		</>
+	)
 }
 
 function navCls(isActive: boolean) {
