@@ -15,7 +15,7 @@ export function ClientDashboard() {
 
 	const rows = myApts.map((a: any) => ({
 		...a,
-		when: dayjs(a.dateTime).format('DD/MM/YYYY HH:mm'),
+		when: dayjs(a.dateTime).utc().format('DD/MM/YYYY HH:mm'),
 		vetName: vets.find((v) => v.id === a.vetId)?.name ?? '—',
 		statusLabel: String(a.status).toLowerCase()
 	}))

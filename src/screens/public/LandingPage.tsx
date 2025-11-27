@@ -189,7 +189,7 @@ export function LandingPage() {
 								<Select value={form.slot} onChange={(e) => setForm((f) => ({ ...f, slot: e.target.value }))} label="Horario" error={errors.slot}>
 									<option value="">Horario</option>
 									{slots.map((s) => (
-										<option key={s} value={s}>{dayjs(s).format('HH:mm')}</option>
+										<option key={s} value={s}>{dayjs(s).utc().format('HH:mm')}</option>
 									))}
 								</Select>
 								<div className="sm:col-span-2">

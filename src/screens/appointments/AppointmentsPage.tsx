@@ -131,7 +131,7 @@ export function AppointmentsPage() {
 						<tbody>
 							{data.map((a) => (
 								<tr key={a.id} className="border-t">
-									<td className="px-4 py-2 whitespace-nowrap">{dayjs((a as any).dateTime).format('DD/MM/YYYY HH:mm')}</td>
+									<td className="px-4 py-2 whitespace-nowrap">{dayjs((a as any).dateTime).utc().format('DD/MM/YYYY HH:mm')}</td>
 									<td className="px-4 py-2">{(a as any).clientName}</td>
 									<td className="px-4 py-2">{(a as any).contact}</td>
 									<td className="px-4 py-2">{(a as any).vetName}</td>
@@ -192,7 +192,7 @@ export function AppointmentsPage() {
 						<option value="">Selecciona horario</option>
 						{slots.map((s) => (
 							<option key={s} value={s}>
-								{dayjs(s).format('HH:mm')}
+								{dayjs(s).utc().format('HH:mm')}
 							</option>
 						))}
 					</Select>
@@ -221,7 +221,7 @@ export function AppointmentsPage() {
 					<Input label="Fecha" type="date" min={dayjs().format('YYYY-MM-DD')} value={cform.date} onChange={(e) => setCform((f) => ({ ...f, date: e.target.value }))} error={cerrors.date} />
 					<Select label="Horario" value={cform.slot} onChange={(e) => setCform((f) => ({ ...f, slot: e.target.value }))} error={cerrors.slot}>
 						<option value="">Selecciona horario</option>
-						{cslots.map((s) => (<option key={s} value={s}>{dayjs(s).format('HH:mm')}</option>))}
+						{cslots.map((s) => (<option key={s} value={s}>{dayjs(s).utc().format('HH:mm')}</option>))}
 					</Select>
 					<div className="sm:col-span-2">
 						<Select label="Motivo" value={cform.reason} onChange={(e) => setCform((f) => ({ ...f, reason: e.target.value }))} error={cerrors.reason}>
