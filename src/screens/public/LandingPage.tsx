@@ -192,7 +192,7 @@ export function LandingPage() {
 						<div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/95 p-6 shadow-2xl backdrop-blur">
 							<h2 className="text-lg font-semibold text-gray-900">Inicia sesión</h2>
 							<p className="text-sm text-gray-600">Accede para reservar tu hora</p>
-							<form className="mt-4 space-y-4" onSubmit={submitLogin}>
+							<form className="mt-4 space-y-4" onSubmit={submitLogin} noValidate>
 								<Input type="email" label="Correo electrónico" placeholder="tu@correo.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
 								<Input type="password" label="Contraseña" placeholder="••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
 								<div className="flex items-center justify-between">
@@ -208,7 +208,7 @@ export function LandingPage() {
 						<div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/95 p-6 shadow-2xl backdrop-blur">
 							<h2 className="text-lg font-semibold text-gray-900">Crear cuenta</h2>
 							<p className="text-sm text-gray-600">Regístrate para reservar</p>
-							<form className="mt-4 space-y-4" onSubmit={submitRegister} autoComplete="off">
+							<form className="mt-4 space-y-4" onSubmit={submitRegister} autoComplete="off" noValidate>
 								<Input label="Nombre completo" placeholder="Ej. Juan Pérez" value={regName} onChange={(e) => setRegName(e.target.value)} error={authErrors.name} autoComplete="off" />
 								<Input label="Teléfono" placeholder="Ej. 999-111-222" value={regPhone} onChange={(e) => setRegPhone(e.target.value)} error={authErrors.phone} autoComplete="off" />
 								<Input type="email" label="Correo" placeholder="tu@correo.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} error={authErrors.email} autoComplete="off" />
