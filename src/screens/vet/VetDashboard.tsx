@@ -30,7 +30,7 @@ export function VetDashboard() {
 										<td className="px-4 py-2">
 											<div className="flex gap-2">
 												<Link to={`/visita/${a.id}`} className="btn btn-primary">Atender</Link>
-												<Button variant="outline" onClick={() => cancel(a.id as any, 'vet')}>Cancelar (Vet)</Button>
+												<Button variant="outline" onClick={() => { if (confirm('¿Seguro que deseas cancelar esta cita?')) cancel(a.id as any, 'vet') }}>Cancelar (Vet)</Button>
 											</div>
 										</td>
 									</tr>

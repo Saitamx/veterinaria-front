@@ -19,6 +19,9 @@ export function UsersPage() {
 		try {
 			const users = await api.adminListUsers()
 			setList(users)
+		} catch (err: any) {
+			const msg = typeof err?.message === 'string' ? err.message : 'No se pudo cargar la lista de usuarios'
+			show({ title: 'Error', description: msg, variant: 'error' })
 		} finally {
 			setLoading(false)
 		}
@@ -78,6 +81,9 @@ export function UsersPage() {
 			<div className="card p-5">
 				<h2 className="font-semibold mb-3">Lista</h2>
 				{loading ? <p className="text-sm text-gray-600">Cargando...</p> : null}
+				{!loading && list.length === 0 ? (
+					<p className="text-sm text-gray-600">No hay usuarios registrados.</p>
+				) : null}
 				<div className="overflow-x-auto">
 					<table className="min-w-full text-sm">
 						<thead className="bg-gray-50">

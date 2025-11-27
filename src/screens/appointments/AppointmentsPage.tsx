@@ -32,7 +32,9 @@ export function AppointmentsPage() {
 		() =>
 			appointments.map((a: any) => ({
 				...a,
-				vetName: vets.find((v) => v.id === a.vetId)?.name ?? '—'
+				vetName: vets.find((v) => v.id === a.vetId)?.name ?? '—',
+				clientName: a.user?.name ?? '—',
+				contact: a.user?.phone || a.user?.email || '—'
 			})),
 		[appointments, vets]
 	)
@@ -73,6 +75,8 @@ export function AppointmentsPage() {
 						<thead className="bg-gray-50 text-gray-700">
 							<tr>
 								<th className="px-4 py-2 text-left">Fecha</th>
+								<th className="px-4 py-2 text-left">Cliente</th>
+								<th className="px-4 py-2 text-left">Contacto</th>
 								<th className="px-4 py-2 text-left">Veterinario</th>
 								<th className="px-4 py-2 text-left">Estado</th>
 								<th className="px-4 py-2"></th>
@@ -82,6 +86,8 @@ export function AppointmentsPage() {
 							{data.map((a) => (
 								<tr key={a.id} className="border-t">
 									<td className="px-4 py-2 whitespace-nowrap">{dayjs((a as any).dateTime).format('DD/MM/YYYY HH:mm')}</td>
+									<td className="px-4 py-2">{(a as any).clientName}</td>
+									<td className="px-4 py-2">{(a as any).contact}</td>
 									<td className="px-4 py-2">{(a as any).vetName}</td>
 									<td className="px-4 py-2 capitalize">{(a as any).status.toLowerCase()}</td>
 									<td className="px-4 py-2">
@@ -89,7 +95,7 @@ export function AppointmentsPage() {
 											<Button variant="outline" onClick={() => openEdit(a)}>
 												Cambiar
 											</Button>
-											<Button variant="outline" onClick={() => cancel(a.id as any, 'client')}>
+											<Button variant="outline" onClick={() => { if (confirm('¿Seguro que deseas cancelar esta cita?')) cancel(a.id as any, 'client') }}>
 												Cancelar
 											</Button>
 										</div>
@@ -110,7 +116,7 @@ export function AppointmentsPage() {
 						<Button variant="outline" onClick={() => setOpen(false)}>
 							Cancelar
 						</Button>
-						<Button onClick={submit}>Guardar</Button>
+						<Button onClick={() => { if (confirm('¿Confirmas reprogramar esta cita?')) submit() }}>Guardar</Button>
 					</div>
 				}
 			>

@@ -29,6 +29,7 @@ export type Appointment = {
 	dateTime: string
 	status: 'PROGRAMADA' | 'CONFIRMADA' | 'CANCELADA'
 	vet?: Vet
+	user?: { id: string; name: string; email: string; phone?: string }
 }
 
 export const api = {
