@@ -66,6 +66,8 @@ export function LandingPage() {
 	// Inline auth forms inside landing
 	const [loginEmail, setLoginEmail] = useState('')
 	const [loginPassword, setLoginPassword] = useState('')
+	const [loginErrors, setLoginErrors] = useState<{ email?: string; password?: string }>({})
+	const [loginGeneralError, setLoginGeneralError] = useState<string | null>(null)
 	const [regName, setRegName] = useState('')
 	const [regPhone, setRegPhone] = useState('')
 	const [regEmail, setRegEmail] = useState('')
@@ -75,17 +77,39 @@ export function LandingPage() {
 	const [authErrors, setAuthErrors] = useState<{ name?: string; phone?: string; email?: string; password?: string; confirm?: string }>({})
 	const { login, registerClient } = useAuth()
 
+	function validateLogin(): boolean {
+		const e: typeof loginErrors = {}
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail)) e.email = 'Ingresa un correo válido'
+		if (loginPassword.length < 6) e.password = 'La contraseña debe tener al menos 6 caracteres'
+		setLoginErrors(e)
+		return Object.keys(e).length === 0
+	}
+
 	async function submitLogin(e: React.FormEvent) {
 		e.preventDefault()
+		if (!validateLogin()) return
 		setAuthLoading(true)
-		const ok = await login(loginEmail, loginPassword)
-		setAuthLoading(false)
-		if (!ok) {
-			show({ title: 'Credenciales inválidas', variant: 'error' })
-			return
+		setLoginGeneralError(null)
+		try {
+			const ok = await login(loginEmail, loginPassword)
+			if (!ok) throw new Error('Credenciales inválidas')
+			show({ title: 'Bienvenido', variant: 'success' })
+			setAuthMode(null)
+		} catch (err: any) {
+			let msg = 'Credenciales inválidas'
+			if (typeof err?.message === 'string') {
+				try {
+					const parsed = JSON.parse(err.message)
+					msg = parsed?.error ?? msg
+				} catch {
+					msg = err.message || msg
+				}
+			}
+			setLoginGeneralError(msg)
+			show({ title: 'No se pudo iniciar sesión', description: msg, variant: 'error' })
+		} finally {
+			setAuthLoading(false)
 		}
-		show({ title: 'Bienvenido', variant: 'success' })
-		setAuthMode(null)
 	}
 
 	function validateRegister(): boolean {
@@ -193,8 +217,33 @@ export function LandingPage() {
 							<h2 className="text-lg font-semibold text-gray-900">Inicia sesión</h2>
 							<p className="text-sm text-gray-600">Accede para reservar tu hora</p>
 							<form className="mt-4 space-y-4" onSubmit={submitLogin} noValidate>
-								<Input type="email" label="Correo electrónico" placeholder="tu@correo.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
-								<Input type="password" label="Contraseña" placeholder="••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+								{loginGeneralError ? (
+									<div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+										{loginGeneralError}
+									</div>
+								) : null}
+								<Input
+									type="email"
+									label="Correo electrónico"
+									placeholder="tu@correo.com"
+									value={loginEmail}
+									onChange={(e) => setLoginEmail(e.target.value)}
+									onBlur={() => setLoginErrors((prev) => ({ ...prev, email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail) ? undefined : 'Ingresa un correo válido' }))}
+									error={loginErrors.email}
+									hint="Ingresa un correo válido"
+									title="Ingresa un correo válido"
+								/>
+								<Input
+									type="password"
+									label="Contraseña"
+									placeholder="••••••"
+									value={loginPassword}
+									onChange={(e) => setLoginPassword(e.target.value)}
+									onBlur={() => setLoginErrors((prev) => ({ ...prev, password: loginPassword.length < 6 ? 'La contraseña debe tener al menos 6 caracteres' : undefined }))}
+									error={loginErrors.password}
+									hint="Mínimo 6 caracteres"
+									title="Mínimo 6 caracteres"
+								/>
 								<div className="flex items-center justify-between">
 									<Button type="button" variant="outline" onClick={() => setAuthMode(null)}>Volver</Button>
 									<Button type="submit" isLoading={authLoading}>Ingresar</Button>
