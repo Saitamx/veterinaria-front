@@ -1,4 +1,14 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const inferProdApi = () => {
+	if (typeof window !== 'undefined') {
+		const host = window.location.hostname
+		if (host.endsWith('vercel.app')) {
+			return 'https://veterinaria-api-production.up.railway.app'
+		}
+	}
+	return 'http://localhost:4000'
+}
+
+const BASE_URL = import.meta.env.VITE_API_URL || inferProdApi()
 
 function authHeaders() {
 	const token = localStorage.getItem('auth_token')
