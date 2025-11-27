@@ -23,6 +23,13 @@ export function LoginPage() {
 		return Object.keys(e).length === 0
 	}
 
+	function validateOne(field: keyof typeof errors) {
+		const e: typeof errors = { ...errors }
+		if (field === 'email') e.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? undefined : 'Ingresa un correo válido'
+		if (field === 'password') e.password = password.length < 6 ? 'La contraseña debe tener al menos 6 caracteres' : undefined
+		setErrors(e)
+	}
+
 	async function submit(e: React.FormEvent) {
 		e.preventDefault()
 		if (!validate()) return
@@ -64,8 +71,8 @@ export function LoginPage() {
 									{generalError}
 								</div>
 							) : null}
-							<Input type="email" label="Correo electrónico" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
-							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} />
+							<Input type="email" label="Correo electrónico" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => validateOne('email')} error={errors.email} hint="Ingresa un correo válido" title="Ingresa un correo válido" />
+							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => validateOne('password')} error={errors.password} hint="Mínimo 6 caracteres" title="Mínimo 6 caracteres" />
 							<Button type="submit" isLoading={loading} className="w-full">
 								Ingresar
 							</Button>

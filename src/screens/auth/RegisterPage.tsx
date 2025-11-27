@@ -29,6 +29,16 @@ export function RegisterPage() {
 		return Object.keys(e).length === 0
 	}
 
+	function validateOne(field: keyof typeof errors) {
+		const e: typeof errors = { ...errors }
+		if (field === 'name') e.name = name.trim().length < 2 ? 'Ingresa tu nombre completo' : undefined
+		if (field === 'phone') e.phone = /^[0-9+()\-\s]{6,}$/.test(phone) ? undefined : 'Ingresa un teléfono válido'
+		if (field === 'email') e.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? undefined : 'Ingresa un correo válido'
+		if (field === 'password') e.password = password.length < 6 ? 'La contraseña debe tener al menos 6 caracteres' : undefined
+		if (field === 'confirmPassword') e.confirmPassword = confirmPassword !== password ? 'Las contraseñas no coinciden' : undefined
+		setErrors(e)
+	}
+
 	async function submit(e: React.FormEvent) {
 		e.preventDefault()
 		if (!validate()) return
@@ -70,11 +80,11 @@ export function RegisterPage() {
 									{generalError}
 								</div>
 							) : null}
-							<Input label="Nombre completo" placeholder="Ej. Juan Pérez" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} autoComplete="off" />
-							<Input label="Teléfono" placeholder="Ej. 999-111-222" value={phone} onChange={(e) => setPhone(e.target.value)} error={errors.phone} autoComplete="off" />
-							<Input type="email" label="Correo" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} autoComplete="off" />
-							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} autoComplete="new-password" />
-							<Input type="password" label="Confirmar contraseña" placeholder="••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} error={errors.confirmPassword} autoComplete="new-password" />
+							<Input label="Nombre completo" placeholder="Ej. Juan Pérez" value={name} onChange={(e) => setName(e.target.value)} onBlur={() => validateOne('name')} error={errors.name} autoComplete="off" hint="Tu nombre y apellido" title="Tu nombre y apellido" />
+							<Input label="Teléfono" placeholder="Ej. 999-111-222" value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => validateOne('phone')} error={errors.phone} autoComplete="off" hint="Mínimo 6 dígitos; se permiten + ( ) -" title="Mínimo 6 dígitos; se permiten + ( ) -" />
+							<Input type="email" label="Correo" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => validateOne('email')} error={errors.email} autoComplete="off" hint="Debe ser un correo válido" title="Debe ser un correo válido" />
+							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => validateOne('password')} error={errors.password} autoComplete="new-password" hint="Mínimo 6 caracteres" title="Mínimo 6 caracteres" />
+							<Input type="password" label="Confirmar contraseña" placeholder="••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onBlur={() => validateOne('confirmPassword')} error={errors.confirmPassword} autoComplete="new-password" hint="Debe coincidir con la contraseña" title="Debe coincidir con la contraseña" />
 							<Button type="submit" isLoading={loading} className="w-full">
 								Registrarme
 							</Button>
