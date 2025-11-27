@@ -65,7 +65,7 @@ export function LoginPage() {
 						<h1 className="text-xl font-semibold">Inicia sesión</h1>
 					</div>
 					<div className="px-6 py-6">
-						<form className="space-y-4" onSubmit={submit}>
+						<form className="space-y-4" onSubmit={submit} noValidate>
 							{generalError ? (
 								<div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
 									{generalError}
