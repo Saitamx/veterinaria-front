@@ -6,14 +6,12 @@ function authHeaders() {
 }
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
-	const res = await fetch(`${BASE_URL}${path}`, {
-		...init,
-		headers: {
-			'Content-Type': 'application/json',
-			...(init?.headers || {}),
-			...authHeaders()
-		}
-	})
+	const merged: Record<string, string> = {
+		'Content-Type': 'application/json',
+		...(init?.headers ? (init.headers as Record<string, string>) : {}),
+		...(authHeaders() as Record<string, string>)
+	}
+	const res = await fetch(`${BASE_URL}${path}`, { ...init, headers: merged })
 	if (!res.ok) {
 		const txt = await res.text().catch(() => '')
 		throw new Error(txt || `HTTP ${res.status}`)
