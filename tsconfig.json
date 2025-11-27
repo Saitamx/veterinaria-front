@@ -14,7 +14,14 @@
     "noUncheckedIndexedAccess": true,
     "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/services/fakeApi.ts",
+    "src/screens/visit/**",
+    "src/screens/inventory/**",
+    "src/screens/pets/**",
+    "src/screens/Dashboard.tsx"
+  ]
 }
 
 

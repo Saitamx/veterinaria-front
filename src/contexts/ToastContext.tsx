@@ -1,5 +1,4 @@
 import { ReactNode, createContext, useContext, useMemo, useState } from 'react'
-import { v4 as uuid } from 'uuid'
 
 type Toast = {
 	id: string
@@ -22,7 +21,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 		() => ({
 			toasts,
 			show: (t) => {
-				const toast = { id: uuid(), ...t }
+				const id =
+					typeof crypto !== 'undefined' && 'randomUUID' in crypto
+						? crypto.randomUUID()
+						: Math.random().toString(36).slice(2)
+				const toast = { id, ...t }
 				setToasts((prev) => [...prev, toast])
 				setTimeout(() => {
 					setToasts((prev) => prev.filter((x) => x.id !== toast.id))
