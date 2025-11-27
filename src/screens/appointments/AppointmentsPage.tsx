@@ -102,10 +102,7 @@ export function AppointmentsPage() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<h1 className="text-xl font-semibold">Citas</h1>
-				<div className="flex gap-2">
-					<Button onClick={openNew}>Reprogramar cita</Button>
-					{(user?.role === 'admin' || user?.role === 'recepcionista') && <Button onClick={openCreate}>Nueva cita</Button>}
-				</div>
+				{(user?.role === 'admin' || user?.role === 'recepcionista') && <Button onClick={openCreate}>Nueva cita</Button>}
 			</div>
 
 			<div className="card overflow-hidden">
@@ -216,7 +213,15 @@ export function AppointmentsPage() {
 						{cslots.map((s) => (<option key={s} value={s}>{dayjs(s).format('HH:mm')}</option>))}
 					</Select>
 					<div className="sm:col-span-2">
-						<Input label="Motivo" value={cform.reason} onChange={(e) => setCform((f) => ({ ...f, reason: e.target.value }))} error={cerrors.reason} />
+						<Select label="Motivo" value={cform.reason} onChange={(e) => setCform((f) => ({ ...f, reason: e.target.value }))} error={cerrors.reason}>
+							<option value="">Selecciona un motivo</option>
+							<option>Control general</option>
+							<option>Vacunación</option>
+							<option>Desparasitación</option>
+							<option>Cirugía menor</option>
+							<option>Consulta por síntomas</option>
+							<option>Otro</option>
+						</Select>
 					</div>
 				</div>
 			</Modal>

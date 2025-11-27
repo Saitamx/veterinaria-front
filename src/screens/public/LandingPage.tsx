@@ -70,7 +70,9 @@ export function LandingPage() {
 	const [regPhone, setRegPhone] = useState('')
 	const [regEmail, setRegEmail] = useState('')
 	const [regPassword, setRegPassword] = useState('')
+	const [regConfirm, setRegConfirm] = useState('')
 	const [authLoading, setAuthLoading] = useState(false)
+	const [authErrors, setAuthErrors] = useState<{ name?: string; phone?: string; email?: string; password?: string; confirm?: string }>({})
 	const { login, registerClient } = useAuth()
 
 	async function submitLogin(e: React.FormEvent) {
@@ -86,17 +88,32 @@ export function LandingPage() {
 		setAuthMode(null)
 	}
 
+	function validateRegister(): boolean {
+		const e: typeof authErrors = {}
+		if (regName.trim().length < 2) e.name = 'Ingresa tu nombre completo'
+		if (!/^[0-9+()\-\s]{6,}$/.test(regPhone)) e.phone = 'Ingresa un teléfono válido'
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail)) e.email = 'Ingresa un correo válido'
+		if (regPassword.length < 6) e.password = 'La contraseña debe tener al menos 6 caracteres'
+		if (regConfirm !== regPassword) e.confirm = 'Las contraseñas no coinciden'
+		setAuthErrors(e)
+		return Object.keys(e).length === 0
+	}
+
 	async function submitRegister(e: React.FormEvent) {
 		e.preventDefault()
+		if (!validateRegister()) return
 		setAuthLoading(true)
-		const ok = await registerClient({ name: regName, email: regEmail, password: regPassword, phone: regPhone })
-		setAuthLoading(false)
-		if (!ok) {
-			show({ title: 'No se pudo registrar (correo en uso)', variant: 'error' })
-			return
+		try {
+			const ok = await registerClient({ name: regName, email: regEmail, password: regPassword, phone: regPhone })
+			if (!ok) throw new Error('No se pudo registrar')
+			show({ title: 'Registro exitoso', variant: 'success' })
+			setAuthMode(null)
+		} catch (err: any) {
+			const msg = typeof err?.message === 'string' ? err.message : 'No se pudo registrar'
+			show({ title: 'Error en registro', description: msg, variant: 'error' })
+		} finally {
+			setAuthLoading(false)
 		}
-		show({ title: 'Registro exitoso', variant: 'success' })
-		setAuthMode(null)
 	}
 
 	return (
@@ -151,7 +168,20 @@ export function LandingPage() {
 									))}
 								</Select>
 								<div className="sm:col-span-2">
-									<Input placeholder="Motivo" value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} label="Motivo" error={errors.reason} />
+									<Select
+										label="Motivo"
+										value={form.reason}
+										onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
+										error={errors.reason}
+									>
+										<option value="">Selecciona un motivo</option>
+										<option>Control general</option>
+										<option>Vacunación</option>
+										<option>Desparasitación</option>
+										<option>Cirugía menor</option>
+										<option>Consulta por síntomas</option>
+										<option>Otro</option>
+									</Select>
 								</div>
 							</div>
 							<div className="mt-5 flex items-center justify-end">
@@ -178,11 +208,12 @@ export function LandingPage() {
 						<div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/95 p-6 shadow-2xl backdrop-blur">
 							<h2 className="text-lg font-semibold text-gray-900">Crear cuenta</h2>
 							<p className="text-sm text-gray-600">Regístrate para reservar</p>
-							<form className="mt-4 space-y-4" onSubmit={submitRegister}>
-								<Input label="Nombre completo" placeholder="Ej. Juan Pérez" value={regName} onChange={(e) => setRegName(e.target.value)} />
-								<Input label="Teléfono" placeholder="Ej. 999-111-222" value={regPhone} onChange={(e) => setRegPhone(e.target.value)} />
-								<Input type="email" label="Correo" placeholder="tu@correo.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} />
-								<Input type="password" label="Contraseña" placeholder="••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} />
+							<form className="mt-4 space-y-4" onSubmit={submitRegister} autoComplete="off">
+								<Input label="Nombre completo" placeholder="Ej. Juan Pérez" value={regName} onChange={(e) => setRegName(e.target.value)} error={authErrors.name} autoComplete="off" />
+								<Input label="Teléfono" placeholder="Ej. 999-111-222" value={regPhone} onChange={(e) => setRegPhone(e.target.value)} error={authErrors.phone} autoComplete="off" />
+								<Input type="email" label="Correo" placeholder="tu@correo.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} error={authErrors.email} autoComplete="off" />
+								<Input type="password" label="Contraseña" placeholder="••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} error={authErrors.password} autoComplete="new-password" />
+								<Input type="password" label="Confirmar contraseña" placeholder="••••••" value={regConfirm} onChange={(e) => setRegConfirm(e.target.value)} error={authErrors.confirm} autoComplete="new-password" />
 								<div className="flex items-center justify-between">
 									<Button type="button" variant="outline" onClick={() => setAuthMode(null)}>Volver</Button>
 									<Button type="submit" isLoading={authLoading}>Registrarme</Button>

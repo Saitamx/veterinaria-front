@@ -4,8 +4,9 @@ import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
 import { useToast } from '../../contexts/ToastContext'
 import { api } from '../../services/backendApi'
+import { Modal } from '../../components/ui/Modal'
 
-type UserRow = { id: string; name: string; email: string; role: 'CLIENTE' | 'RECEPCIONISTA' | 'VETERINARIO' | 'ADMIN'; phone?: string; createdAt?: string }
+type UserRow = { id: string; name: string; email: string; role: 'CLIENTE' | 'RECEPCIONISTA' | 'VETERINARIO' | 'ADMIN'; phone?: string; createdAt?: string; active?: boolean }
 
 export function UsersPage() {
 	const { show } = useToast()
@@ -13,6 +14,9 @@ export function UsersPage() {
 	const [loading, setLoading] = useState(false)
 	const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', role: 'CLIENTE' as UserRow['role'] })
 	const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; role?: string }>({})
+	const [confirmOpen, setConfirmOpen] = useState(false)
+	const [confirmUser, setConfirmUser] = useState<UserRow | null>(null)
+	const [confirmNext, setConfirmNext] = useState<boolean>(true)
 
 	async function refresh() {
 		setLoading(true)
@@ -91,6 +95,8 @@ export function UsersPage() {
 								<th className="px-4 py-2 text-left">Nombre</th>
 								<th className="px-4 py-2 text-left">Correo</th>
 								<th className="px-4 py-2 text-left">Rol</th>
+								<th className="px-4 py-2 text-left">Estado</th>
+								<th className="px-4 py-2"></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -99,12 +105,56 @@ export function UsersPage() {
 									<td className="px-4 py-2">{u.name}</td>
 									<td className="px-4 py-2">{u.email}</td>
 									<td className="px-4 py-2">{u.role}</td>
+									<td className="px-4 py-2">{u.active ? 'Activo' : 'Inactivo'}</td>
+									<td className="px-4 py-2">
+										<Button
+											variant="outline"
+											onClick={() => {
+												setConfirmUser(u)
+												setConfirmNext(!u.active)
+												setConfirmOpen(true)
+											}}
+										>
+											{u.active ? 'Desactivar' : 'Activar'}
+										</Button>
+									</td>
 								</tr>
 							))}
 						</tbody>
 					</table>
 				</div>
 			</div>
+
+			<Modal
+				title={confirmNext ? 'Activar usuario' : 'Desactivar usuario'}
+				open={confirmOpen}
+				onClose={() => setConfirmOpen(false)}
+				footer={
+					<div className="flex items-center justify-end gap-2">
+						<Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancelar</Button>
+						<Button
+							onClick={async () => {
+								if (!confirmUser) return
+								try {
+									await api.adminSetUserActive(confirmUser.id, confirmNext)
+									show({ title: confirmNext ? 'Usuario activado' : 'Usuario desactivado', variant: 'success' })
+									setConfirmOpen(false)
+									refresh()
+								} catch (err: any) {
+									show({ title: 'Error', description: err?.message || 'No se pudo actualizar', variant: 'error' })
+								}
+							}}
+						>
+							Confirmar
+						</Button>
+					</div>
+				}
+			>
+				<p className="text-sm text-gray-700">
+					¿Seguro que deseas {confirmNext ? 'activar' : 'desactivar'} al usuario{' '}
+					<span className="font-medium">{confirmUser?.name}</span> ({confirmUser?.email})?
+				</p>
+			</Modal>
 		</div>
 	)
 }

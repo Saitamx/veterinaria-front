@@ -59,10 +59,13 @@ export const api = {
 		return http<Appointment>(`/appointments/${id}?canceledBy=${canceledBy}`, { method: 'DELETE' })
 	},
 	async adminListUsers() {
-		return http<Array<{ id: string; name: string; email: string; role: 'CLIENTE' | 'RECEPCIONISTA' | 'VETERINARIO' | 'ADMIN'; phone?: string }>>('/admin/users')
+		return http<Array<{ id: string; name: string; email: string; role: 'CLIENTE' | 'RECEPCIONISTA' | 'VETERINARIO' | 'ADMIN'; phone?: string; active: boolean }>>('/admin/users')
 	},
 	async adminCreateUser(input: { name: string; email: string; password: string; role: 'CLIENTE' | 'RECEPCIONISTA' | 'VETERINARIO' | 'ADMIN'; phone?: string }) {
 		return http(`/admin/users`, { method: 'POST', body: JSON.stringify(input) })
+	},
+	async adminSetUserActive(id: string, active: boolean) {
+		return http(`/admin/users/${id}/active`, { method: 'PATCH', body: JSON.stringify({ active }) })
 	},
 	async manageCreateAppointment(input: { userEmail: string; vetId: string; dateISO: string; reason: string }) {
 		return http('/manage/appointments', { method: 'POST', body: JSON.stringify(input) })
