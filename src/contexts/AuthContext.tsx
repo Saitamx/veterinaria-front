@@ -32,28 +32,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		() => ({
 			user,
 			async login(email, password) {
-				try {
-					const { token, user } = await api.login({ email, password })
-					localStorage.setItem('auth_token', token)
-					setUser(mapApiUser(user))
-					return true
-				} catch {
-					return false
-				}
+				const { token, user } = await api.login({ email, password })
+				localStorage.setItem('auth_token', token)
+				setUser(mapApiUser(user))
+				return true
 			},
 			logout() {
 				localStorage.removeItem('auth_token')
 				setUser(null)
 			},
 			async registerClient({ name, email, password, phone }) {
-				try {
-					const { token, user } = await api.register({ name, email, password, phone })
-					localStorage.setItem('auth_token', token)
-					setUser(mapApiUser(user))
-					return true
-				} catch {
-					return false
-				}
+				const { token, user } = await api.register({ name, email, password, phone })
+				localStorage.setItem('auth_token', token)
+				setUser(mapApiUser(user))
+				return true
 			}
 		}),
 		[user]

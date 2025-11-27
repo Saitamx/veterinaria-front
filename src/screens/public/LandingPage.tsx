@@ -24,6 +24,7 @@ export function LandingPage() {
 		reason: 'Reserva desde la web'
 	})
 	const [slots, setSlots] = useState<string[]>([])
+	const [errors, setErrors] = useState<{ vetId?: string; date?: string; slot?: string; reason?: string }>({})
 	useEffect(() => {
 		if (user?.role === 'cliente') {
 			setForm((f) => ({ ...f, clientName: user.name, clientPhone: user.phone ?? f.clientPhone }))
@@ -46,10 +47,13 @@ export function LandingPage() {
 				show({ title: 'Debes iniciar sesión para reservar', variant: 'error' })
 				return
 			}
-			if (!form.vetId || !form.slot || !form.reason) {
-				show({ title: 'Completa el formulario', variant: 'error' })
-				return
-			}
+			const e: typeof errors = {}
+			if (!form.vetId) e.vetId = 'Selecciona un veterinario'
+			if (!form.date) e.date = 'Selecciona una fecha'
+			if (!form.slot) e.slot = 'Selecciona un horario disponible'
+			if (!form.reason || form.reason.trim().length < 3) e.reason = 'Indica el motivo (mínimo 3 caracteres)'
+			setErrors(e)
+			if (Object.keys(e).length > 0) return
 			await create({ vetId: form.vetId, reason: form.reason, dateISO: form.slot })
 			show({ title: 'Cita solicitada', variant: 'success' })
 			setForm((f) => ({ ...f, slot: '' }))
@@ -133,21 +137,21 @@ export function LandingPage() {
 							<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
 								<Input placeholder="Tu nombre" value={form.clientName} onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))} />
 								<Input placeholder="Tu teléfono" value={form.clientPhone} onChange={(e) => setForm((f) => ({ ...f, clientPhone: e.target.value }))} />
-								<Select value={form.vetId} onChange={(e) => setForm((f) => ({ ...f, vetId: e.target.value }))}>
+								<Select value={form.vetId} onChange={(e) => setForm((f) => ({ ...f, vetId: e.target.value }))} label="Veterinario" error={errors.vetId}>
 									<option value="">Veterinario</option>
 									{vets.map((v) => (
 										<option key={v.id} value={v.id}>{v.name}</option>
 									))}
 								</Select>
-								<Input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
-								<Select value={form.slot} onChange={(e) => setForm((f) => ({ ...f, slot: e.target.value }))}>
+								<Input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} label="Fecha" error={errors.date} />
+								<Select value={form.slot} onChange={(e) => setForm((f) => ({ ...f, slot: e.target.value }))} label="Horario" error={errors.slot}>
 									<option value="">Horario</option>
 									{slots.map((s) => (
 										<option key={s} value={s}>{dayjs(s).format('HH:mm')}</option>
 									))}
 								</Select>
 								<div className="sm:col-span-2">
-									<Input placeholder="Motivo" value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} />
+									<Input placeholder="Motivo" value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} label="Motivo" error={errors.reason} />
 								</div>
 							</div>
 							<div className="mt-5 flex items-center justify-end">

@@ -18,6 +18,7 @@ export function ClientDashboard() {
 	const [editingId, setEditingId] = useState<string | null>(null)
 	const [form, setForm] = useState({ vetId: '', date: dayjs().format('YYYY-MM-DD'), slot: '' })
 	const [slots, setSlots] = useState<string[]>([])
+	const [errors, setErrors] = useState<{ vetId?: string; date?: string; slot?: string }>({})
 
 	useEffect(() => {
 		async function loadSlots() {
@@ -41,7 +42,12 @@ export function ClientDashboard() {
 	}
 
 	async function submit() {
-		if (!editingId || !form.vetId || !form.slot) return
+		const e: typeof errors = {}
+		if (!form.vetId) e.vetId = 'Selecciona un veterinario'
+		if (!form.date) e.date = 'Selecciona una fecha'
+		if (!form.slot) e.slot = 'Selecciona un horario'
+		setErrors(e)
+		if (!editingId || Object.keys(e).length > 0) return
 		await reschedule(editingId, form.slot, form.vetId)
 		setOpen(false)
 	}
@@ -116,6 +122,7 @@ export function ClientDashboard() {
 						label="Veterinario"
 						value={form.vetId}
 						onChange={(e) => setForm((f) => ({ ...f, vetId: e.target.value }))}
+						error={errors.vetId}
 					>
 						{vets.map((v) => (
 							<option key={v.id} value={v.id}>
@@ -128,12 +135,14 @@ export function ClientDashboard() {
 						type="date"
 						value={form.date}
 						onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+						error={errors.date}
 					/>
 					<Select
 						label="Horario disponible"
 						value={form.slot}
 						onChange={(e) => setForm((f) => ({ ...f, slot: e.target.value }))}
 						hint={slots.length === 0 ? 'No hay horarios en este día' : undefined}
+						error={errors.slot}
 					>
 						<option value="" disabled>
 							Selecciona horario

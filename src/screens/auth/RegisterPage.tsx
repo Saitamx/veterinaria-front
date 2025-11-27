@@ -13,19 +13,43 @@ export function RegisterPage() {
 	const [phone, setPhone] = useState('')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [confirmPassword, setConfirmPassword] = useState('')
 	const [loading, setLoading] = useState(false)
+	const [errors, setErrors] = useState<{ name?: string; phone?: string; email?: string; password?: string; confirmPassword?: string }>({})
+
+	function validate(): boolean {
+		const e: typeof errors = {}
+		if (name.trim().length < 2) e.name = 'Ingresa tu nombre completo'
+		if (!/^[0-9+()\-\s]{6,}$/.test(phone)) e.phone = 'Ingresa un teléfono válido'
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = 'Ingresa un correo válido'
+		if (password.length < 6) e.password = 'La contraseña debe tener al menos 6 caracteres'
+		if (confirmPassword !== password) e.confirmPassword = 'Las contraseñas no coinciden'
+		setErrors(e)
+		return Object.keys(e).length === 0
+	}
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault()
-		setLoading(true)
-		const ok = await registerClient({ name, email, password, phone })
-		setLoading(false)
-		if (!ok) {
-			show({ title: 'No se pudo registrar', description: 'Verifica el correo o intenta más tarde.', variant: 'error' })
-			return
+		if (!validate()) return
+		try {
+			setLoading(true)
+			await registerClient({ name, email, password, phone })
+			show({ title: 'Registro exitoso', variant: 'success' })
+			navigate('/cliente', { replace: true })
+		} catch (err: any) {
+			let msg = 'No se pudo registrar'
+			if (typeof err?.message === 'string') {
+				try {
+					const parsed = JSON.parse(err.message)
+					msg = parsed?.error ?? msg
+				} catch {
+					msg = err.message
+				}
+			}
+			show({ title: 'Error en registro', description: msg, variant: 'error' })
+		} finally {
+			setLoading(false)
 		}
-		show({ title: 'Registro exitoso', variant: 'success' })
-		navigate('/cliente', { replace: true })
 	}
 
 	return (
@@ -37,11 +61,12 @@ export function RegisterPage() {
 						<h1 className="text-xl font-semibold">Crear cuenta</h1>
 					</div>
 					<div className="px-6 py-6">
-						<form className="space-y-4" onSubmit={submit}>
-							<Input label="Nombre completo" placeholder="Ej. Juan Pérez" value={name} onChange={(e) => setName(e.target.value)} />
-							<Input label="Teléfono" placeholder="Ej. 999-111-222" value={phone} onChange={(e) => setPhone(e.target.value)} />
-							<Input type="email" label="Correo" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+						<form className="space-y-4" onSubmit={submit} autoComplete="off">
+							<Input label="Nombre completo" placeholder="Ej. Juan Pérez" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} autoComplete="off" />
+							<Input label="Teléfono" placeholder="Ej. 999-111-222" value={phone} onChange={(e) => setPhone(e.target.value)} error={errors.phone} autoComplete="off" />
+							<Input type="email" label="Correo" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} autoComplete="off" />
+							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} autoComplete="new-password" />
+							<Input type="password" label="Confirmar contraseña" placeholder="••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} error={errors.confirmPassword} autoComplete="new-password" />
 							<Button type="submit" isLoading={loading} className="w-full">
 								Registrarme
 							</Button>

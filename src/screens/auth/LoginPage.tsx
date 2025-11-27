@@ -12,18 +12,30 @@ export function LoginPage() {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [loading, setLoading] = useState(false)
+	const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+
+	function validate(): boolean {
+		const e: typeof errors = {}
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = 'Ingresa un correo válido'
+		if (password.length < 6) e.password = 'La contraseña debe tener al menos 6 caracteres'
+		setErrors(e)
+		return Object.keys(e).length === 0
+	}
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault()
-		setLoading(true)
-		const ok = await login(email, password)
-		setLoading(false)
-		if (!ok) {
-			show({ title: 'Credenciales inválidas', variant: 'error' })
-			return
+		if (!validate()) return
+		try {
+			setLoading(true)
+			await login(email, password)
+			show({ title: 'Bienvenido', variant: 'success' })
+			navigate('/', { replace: true })
+		} catch (err: any) {
+			const msg = typeof err?.message === 'string' ? err.message : 'Credenciales inválidas'
+			show({ title: 'No se pudo iniciar sesión', description: msg, variant: 'error' })
+		} finally {
+			setLoading(false)
 		}
-		show({ title: 'Bienvenido', variant: 'success' })
-		navigate('/', { replace: true })
 	}
 
 	return (
@@ -36,8 +48,8 @@ export function LoginPage() {
 					</div>
 					<div className="px-6 py-6">
 						<form className="space-y-4" onSubmit={submit}>
-							<Input type="email" label="Correo electrónico" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+							<Input type="email" label="Correo electrónico" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
+							<Input type="password" label="Contraseña" placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} />
 							<Button type="submit" isLoading={loading} className="w-full">
 								Ingresar
 							</Button>
