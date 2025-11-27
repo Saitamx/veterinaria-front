@@ -31,14 +31,14 @@ export function LandingPage() {
 	}, [user])
 	useEffect(() => {
 		async function loadSlots() {
-			if (form.vetId && form.date) {
+			if (user && form.vetId && form.date) {
 				const s = await api.slots(form.vetId, dayjs(form.date).format('YYYY-MM-DD'))
 				setSlots(s)
 				setForm((f) => ({ ...f, slot: '' }))
 			}
 		}
 		loadSlots()
-	}, [form.vetId, form.date])
+	}, [user, form.vetId, form.date])
 
 	async function submit() {
 		try {

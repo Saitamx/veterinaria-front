@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useToast } from './ToastContext'
 import { api, type Appointment as ApiAppointment, type Vet as ApiVet } from '../services/backendApi'
+import { useAuth } from './AuthContext'
 
 type AppointmentsContextValue = {
 	vets: ApiVet[]
@@ -17,18 +18,26 @@ export function AppointmentsProvider({ children }: { children: ReactNode }) {
 	const [vets, setVets] = useState<ApiVet[]>([])
 	const [appointments, setAppointments] = useState<ApiAppointment[]>([])
 	const { show } = useToast()
+	const { user } = useAuth()
 
 	async function refresh() {
+		if (!user) {
+			setVets([])
+			setAppointments([])
+			return
+		}
 		const [vs, aps] = await Promise.all([api.vets(), api.appointments()])
 		setVets(vs)
 		setAppointments(aps)
 	}
 	useEffect(() => {
 		refresh()
-	}, [])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user])
 
 	// subscribe to vet cancel alerts
 	useEffect(() => {
+		if (!user) return
 		const off = api.events((e) => {
 			try {
 				const data = JSON.parse((e as MessageEvent).data)
@@ -41,7 +50,8 @@ export function AppointmentsProvider({ children }: { children: ReactNode }) {
 			}
 		})
 		return () => off()
-	}, [])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user])
 
 	const value = useMemo<AppointmentsContextValue>(
 		() => ({

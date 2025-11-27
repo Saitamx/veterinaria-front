@@ -21,7 +21,7 @@ export function RegisterPage() {
 		const ok = await registerClient({ name, email, password, phone })
 		setLoading(false)
 		if (!ok) {
-			show({ title: 'No se pudo registrar (correo en uso)', variant: 'error' })
+			show({ title: 'No se pudo registrar', description: 'Verifica el correo o intenta más tarde.', variant: 'error' })
 			return
 		}
 		show({ title: 'Registro exitoso', variant: 'success' })
